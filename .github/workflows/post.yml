@@ -1,16 +1,15 @@
-# このファイルはリポジトリの .github/workflows/post.yml に置いてください
 name: kpop-news-bot
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # 3時間ごと(UTC)。頻度はお好みで
-  workflow_dispatch:         # 手動実行ボタンも有効化
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
 
 permissions:
-  contents: write            # posted.json をコミットして状態を保存するため
+  contents: write
 
 concurrency:
-  group: kpop-news-bot       # 同時実行を防止
+  group: kpop-news-bot
   cancel-in-progress: false
 
 jobs:
@@ -33,11 +32,7 @@ jobs:
 
       - name: Persist dedup state
         run: |
-          if [ -n "$(git status --porcelain posted.json)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add posted.json
-            git commit -m "chore: update posted state"
-            git push
-          else
-            echo "no state
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posted.json
+          git diff --staged --quiet && echo "no state change" || (git commit -m "chore: update posted state" && git push)
